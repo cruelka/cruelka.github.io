@@ -1,0 +1,87 @@
+jQuery(document).ready(function () {
+
+    jQuery('.btn').on('click', function (e) {
+        $('#order-form').show();
+        $('#order-message').hide();
+    });
+
+    jQuery('.js-send-contact-form').on('submit', function (e) {
+        var form = $(this);
+        var buttonSend = $(form).find('.js-submit-btn');
+
+        if (!e.isDefaultPrevented()) {
+            $.ajax({
+                url: custom_ajax.url + '?action=' + form.attr('data-action'),
+                type: 'post',
+                dataType: 'json',
+                data: form.serialize() + '&nonce=' + custom_ajax.nonce,
+                beforeSend: function () {
+                    buttonSend.attr('disabled', 'disabled').val('Отправка...');
+                },
+                complete: function () {
+                    buttonSend.attr('disabled', false).val(buttonSend.attr('data-value'));
+                },
+                success: function (data) {
+
+                    if (data['error'] == 1) {
+                        alert(data['message']);
+                        return false;
+                    }
+
+                    $('#feedback-form').hide();
+                    $('#feedback-message').show();
+
+                    form[0].reset();
+                }
+            });
+        }
+
+        e.preventDefault();
+    });
+
+    jQuery('.js-send-form').on('submit', function (e) {
+        var form = $(this);
+        var buttonSend = $(form).find('.js-submit-btn');
+        var message = $(form).find('.js-message');
+        var nameOrder = $(this).find('.title-h3').text();
+        var optionsOrder = $(this).find('.title-option');
+        var priceHtml = $(this).find('.price').text();
+        var optionsOrderHtml = '';
+
+        if (optionsOrder.length) {
+            $.each(optionsOrder, function (index, value) {
+                optionsOrderHtml += '- ' + $.trim($(value).text()) + '<br />';
+            });
+        }
+
+        if (!e.isDefaultPrevented()) {
+            $.ajax({
+                url: custom_ajax.url + '?action=' + form.attr('data-action'),
+                type: 'post',
+                dataType: 'json',
+                data: form.serialize() + '&nonce=' + custom_ajax.nonce + '&nameOrder=' + nameOrder + '&optionsOrder=' + optionsOrderHtml + '&price=' + priceHtml,
+                beforeSend: function () {
+                    buttonSend.attr('disabled', 'disabled').val('Отправка...');
+                },
+                complete: function () {
+                    buttonSend.attr('disabled', false).val(buttonSend.attr('data-value'));
+                },
+                success: function (data) {
+
+                    if (data['error'] == 1) {
+                        alert(data['message']);
+                        return false;
+                    }
+
+                    $('#order-form').hide();
+                    $('#order-message').show();
+
+                    form[0].reset();
+                }
+            });
+        }
+
+        e.preventDefault();
+    });
+
+});
